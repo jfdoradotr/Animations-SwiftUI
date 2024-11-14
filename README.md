@@ -214,3 +214,98 @@ With these animation customizations, you can:
 - **Repeat Animations** a set number of times or indefinitely.
 
 Custom animations in SwiftUI allow for creativity and polish, making your app's UI feel more dynamic and engaging. Experiment with these options to find the perfect animation for your design.
+
+## Animating Bindings
+
+In SwiftUI, you can apply animations directly to bindings with the `.animation()` modifier, creating smooth transitions as values changes. This is particularly useful when adjusting values with controls like `Stepper` or `Slider`, where the animation adjusts dynamically based on user input.
+
+### How Binding Animations Work
+
+When you attach `.animation()` to a binding, SwiftUI animates any view properties linked to that binding as it transitions from the current to the new value.
+
+This also works with data that doesn't traditionally "animate" smoothly, like booleans. SwiftUI interprets the change in state (e.g., from `true` to `false`) and animates the transition for properties that depend on that state.
+
+### Basic Example: Animating a Scale with a Binding
+
+Here's an example where `Stepper` and `Button` both modify the `animationAmount` value. The `.animation()` modifier is attached to the binding in `Stepper`, creating a smooth scale transition each time the value changes.
+
+```swift
+struct ContentView: View {
+  @State private var animationAmount = 1.0
+
+  var body: some View {
+    VStack {
+      Stepper("Scale amount", value: $animationAmount.animation(), in: 1...10)
+
+      Spacer()
+
+      Button("Tap me") {
+        animationAmount += 1
+      }
+      .padding(40)
+      .background(.red)
+      .foregroundStyle(.white)
+      .clipShape(.circle)
+      .scaleEffect(animationAmount)
+    }
+  }
+}
+```
+
+- Explanation
+  - The `Stepper` control animates smoothly because `.animation()` is applied to its binding. Each step increases `animationAmount` by 1, and the button's scale effect reflects this change.
+  - However, pressing the button doesn't create the same smooth animation since `.animation()` is only attached to the `Stepper`'s binding, not the button action.
+
+### Customizing the Animation
+
+You can further customize the animation by specifying parameters inside the `.animation()` modifier, such as `duration`, `ease`, and `repeatCount`.
+
+```swift
+struct ContentView: View {
+  @State private var animationAmount = 1.0
+
+  var body: some View {
+    VStack {
+      Stepper(
+        "Scale amount",
+        value: $animationAmount
+          .animation(
+            .easeInOut(duration: 1)
+            .repeatCount(3, autoreverses: true)
+          ),
+        in: 1...10
+      )
+
+      Spacer()
+
+      Button("Tap me") {
+        animationAmount += 1
+      }
+      .padding(40)
+      .background(.red)
+      .foregroundStyle(.white)
+      .clipShape(.circle)
+      .scaleEffect(animationAmount)
+    }
+  }
+}
+```
+
+- Explanation
+  - In this version, the animation applied to `Stepper` has a 1 second duration, repeats 3 times, and reverses on each repeat. Each time you tap the `Stepper`, SwiftUI animates the scale with these custom settings.
+
+### Understanding Binding Animations
+
+SwiftUI animations work by comparing the initial state to the final state. This is why you can animate boolean values: SwiftUI detects the change in state (e.g., `false` or `true`) and animates any visual changes associated with that state transition.
+
+For instance:
+
+- Animating between `false` and `true` could smoothly animate a view's opacity from 0 (invisible) to 1 (visible) if `opacity` is bound to a boolean state.
+
+### Why Use `.animation()` on Bindings?
+
+Using `.animation()` directly on bindings makes it easy to animate properties based on continuous changes in value. It eliminates the need to attach `.animation(.default, value:)` each time the value updates, resulting in cleaner code and smooth transitions.
+
+### Summary
+
+Binding animations in SwiftUI allow for smooth, automatic animations as data changes, with the ability to customize timing, delay, and repetition. This technique provides an effortless way to add life to UI elements like steppers and sliders and works with simple state transitions, even with boolean values.
