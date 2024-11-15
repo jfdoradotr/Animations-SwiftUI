@@ -9,7 +9,7 @@ struct ContentView: View {
 
   var body: some View {
     Button("Tap Me") {
-      withAnimation {
+      withAnimation(.spring(duration: 1, bounce: 0.5)) {
         animationAmount += 360
       }
     }
@@ -19,7 +19,7 @@ struct ContentView: View {
     .clipShape(.circle)
     .rotation3DEffect(
       .degrees(animationAmount),
-      axis: (x: 0, y: 0, z: 1)
+      axis: (x: 0, y: 1, z: 0)
     )
   }
 }
