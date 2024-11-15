@@ -19,7 +19,7 @@ struct ContentView: View {
     .clipShape(.circle)
     .rotation3DEffect(
       .degrees(animationAmount),
-      axis: (x: 1, y: 1, z: 0)
+      axis: (x: 0, y: 0, z: 1)
     )
   }
 }
