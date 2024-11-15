@@ -309,3 +309,109 @@ Using `.animation()` directly on bindings makes it easy to animate properties ba
 ### Summary
 
 Binding animations in SwiftUI allow for smooth, automatic animations as data changes, with the ability to customize timing, delay, and repetition. This technique provides an effortless way to add life to UI elements like steppers and sliders and works with simple state transitions, even with boolean values.
+
+## Creating Explicit Animations
+
+**Explicit animations** in SwiftUI let you directly control how and when an animation occurs. Unlike implicit animations, which are tied to a binding or a modifier, explicit animations are triggered by a specific event or state change, giving you precise control.
+
+### Key Features of Explicit Animations
+
+1. **Triggered Manually**: Explicit animations are not automatically tied to a view or binding. Instead, they are invoked when you want them to occur.
+2. **Uses `withAnimation`**: You wrap your state-change changing logic in the `withAnimation` block to apply an animation.
+3. **Supports Customization**: You can pass animation types to `withAnimation` for full control over the behavior.
+
+### Example 1: Basic Explicit Animation
+
+Here's a simple example where tapping a button rotates it by 360 degrees along the Y-axis.
+
+```swift
+struct ContentView: View {
+  @State private var animationAmount = 0.0
+
+  var body: some View {
+    Button("Tap Me") {
+      withAnimation {
+        animationAmount += 360
+      }
+    }
+    .padding(50)
+    .background(.red)
+    .foregroundStyle(.white)
+    .clipShape(Circle())
+    .rotation3DEffect(
+      .degrees(animationAmount), // Rotate based on animationAmount
+      axis: (x: 0, y: 1, z: 0)  // Rotate along the Y-axis
+    )
+  }
+}
+```
+
+- What's happening:
+  - Tapping the button triggers the `withAnimation` block.
+  - The state variable `animationAmount` increases by 360.
+  - The change is animated, creating a smooth 3D rotation effect.
+
+### Example 2: Rotating Along Different Axes
+
+By modyfing the `axis` parameter in `rotation3DEffect`, you can rotate the button in different directions:
+
+1. Rotate in X and Y:
+
+    ```swift
+    axis: (x: 1, y: 1, z: 0) // Diagonal rotation
+    ```
+
+2. Rotate in Z Only
+
+    ```swift
+    axis: (x: 0, y: 0, z: 1) // Flat rotation on the Z-axis
+    ```
+
+### Example 3: Customizing the Animation with Spring
+
+The `withAnimation` block can accept different animation types. For instance, a **spring animation** adds a bounce effect to the rotation.
+
+```swift
+struct ContentView: View {
+  @State private var animationAmount = 0.0
+
+  var body: some View {
+    Button("Tap Me") {
+      withAnimation(.spring(duration: 1, bounce: 0.5)) {
+        animationAmount += 360
+      }
+    }
+    .padding(50)
+    .background(.red)
+    .foregroundStyle(.white)
+    .clipShape(Circle())
+    .rotation3DEffect(
+      .degrees(animationAmount),
+      axis: (x: 0, y: 1, z: 0)
+    )
+  }
+}
+```
+
+- `spring(duration:bounce:)` Parameters:
+  - `duration`: How long the animation lasts.
+  - `bounce`: How much the element bounces back and forth. Values closer to `1` create more bounce, while values closer to `0` settle quickly.
+
+---
+
+### Why Use Explicit Animations?
+
+- **Precise Control**: They are triggered intentionally, giving you full control over when and how animations occur.
+- **Custom Effects**: With `withAnimation`, you can apply complex, dynamic animations such as spring or easing effects.
+- **Event-Driven**: They are perfect for animations tied to specific user actions or events, like button taps or gesture direction.
+
+---
+
+### Summary
+
+Explicit animations in SwiftUI:
+- Use the `withAnimation` block to trigger animations manually.
+- Allow full customization with animation types like `.spring` or `.easeInOut`.
+- Work well for event-driven changes like rotations, scaling, or movement along specific axes.
+
+By combining explicit animations with custom parameters, you can create engaging and highly interactive UI elements that respond dynamically to user interactions. Experiment with axes, spring animations, and durations to see the full potential of explicit animations in SwiftUI!.
