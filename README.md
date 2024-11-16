@@ -415,3 +415,115 @@ Explicit animations in SwiftUI:
 - Work well for event-driven changes like rotations, scaling, or movement along specific axes.
 
 By combining explicit animations with custom parameters, you can create engaging and highly interactive UI elements that respond dynamically to user interactions. Experiment with axes, spring animations, and durations to see the full potential of explicit animations in SwiftUI!.
+
+## Controlling the Animation Stack
+
+When working with animations in SwiftUI, the **order of modifiers** matters. Each animation affects only the properties of the view that are above it in the modifier stack. Understanding this order allows you to control which properties are animated and even apply different animations to specific properties.
+
+### 1. Simple Animation Example
+
+Here’s a simple animation that changes the background color of a button when a boolean state (`enabled`) toggles:
+
+```swift
+@State private var enabled = false
+
+var body: some View {
+    Button("Tap Me") {
+        enabled.toggle()
+    }
+    .frame(width: 200, height: 200)
+    .background(enabled ? .blue : .red)
+    .foregroundStyle(.white)
+    .animation(.default, value: enabled)
+}
+```
+
+- What's happening:
+  - When the button is tapped, the `enabled` state toggles between `true` and `false`.
+  - The `.background` modifier updates its color based on `enabled`.
+  - `.animation(.default, value: enabled)` animates the transition between red and blue smoothly.
+
+### 2. Modifier Order Matters
+
+The position of the `.animation` modifier in the stack determines which properties are animated. If you add a modifier after the `.animation` modifier, it won't be animated, even if it uses the same state.
+
+#### Example: Modifier After `.animation`
+
+```swift
+@State private var enabled = false
+
+var body: some View {
+    Button("Tap Me") {
+        enabled.toggle()
+    }
+    .frame(width: 200, height: 200)
+    .background(enabled ? .blue : .red)
+    .foregroundStyle(.white)
+    .animation(.default, value: enabled)
+    .clipShape(.rect(cornerRadius: enabled ? 60 : 0)) // Not animated
+}
+```
+
+- What's Happening:
+  - The `.clipShape` modifier depends on the same `enabled` state, but since it's added after `.animation`, it's not animated.
+  - The color change is animated, but the shape change is instant.
+
+### 3. Fixing the Order
+
+To animate the shape change, you need to move the `.clipShape` modifier **above** the `.animation` modifier.
+
+```swift
+@State private var enabled = false
+
+var body: some View {
+    Button("Tap Me") {
+        enabled.toggle()
+    }
+    .frame(width: 200, height: 200)
+    .background(enabled ? .blue : .red)
+    .foregroundStyle(.white)
+    .clipShape(.rect(cornerRadius: enabled ? 60 : 0)) // Animated now
+    .animation(.default, value: enabled)
+}
+```
+
+- What's Happening:
+  - Both the color transition and the shape change are now animated because `.clipShape` is part of the stack affected by `.animation`.
+
+### 4. Applying Different Animations to Different Properties
+
+You can add multiple `.animation` modifiers to customize the animations for different properties.
+Each `.animation` modifier will affect only the properties above it in the stack.
+
+```swift
+@State private var enabled = false
+
+var body: some View {
+    Button("Tap Me") {
+        enabled.toggle()
+    }
+    .frame(width: 200, height: 200)
+    .background(enabled ? .blue : .red)
+    .foregroundStyle(.white)
+    .animation(.default, value: enabled) // Smooth color transition
+    .clipShape(.rect(cornerRadius: enabled ? 60 : 0))
+    .animation(.spring(duration: 1, bounce: 0.9), value: enabled) // Bouncy shape change
+}
+```
+
+- What's happening:
+  - The `.background` color transition uses `.default` animation for a smooth effect.
+  - The `.clipShape` modifier uses a spring animation for a bouncy shape transition.
+
+### Summary of Key Points
+
+1. Modifier Order Matters:
+   1. Animations only affect properties that are **above** the `.animation` modifier in the stack.
+2. Multiple Animations:
+   1. You can use `.animation` modifiers to apply different animations to different properties.
+3. Fine Control:
+   1. The animation stack gives you precise control over how each property is animated, allowing for dynamic and complex effects.
+4. Experiment and Combine:
+   1. By playing with animation types like `.default`, `.spring`, and `.easeInOut`, you can create unique animations tailored to your design needs.
+
+With these tools, you can build rich, layered animations that bring your SwiftUI applications to life!
