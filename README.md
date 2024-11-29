@@ -794,3 +794,105 @@ struct ContentView: View {
    1. Apply `.transition(.scale)` or other predefined transitions to create specific effects.
 4. **Asymmetric Transitions**:
    1. Use `.asymmetric` to define separate animations for how a view enters and exits the screen.
+
+## Building custom transitions using ViewModifier
+
+SwiftUI provides several built-in transitions like `.opacity`, `.scale` and `.slide`. But if you want to create a unique effect, you can design your own transition by using a **ViewModifier**. This allows you to apply custom animations when a view appears or disappears.
+
+### 1. Creating a Custom Modifier
+
+A **ViewModifier** is a reusable way to encapsulate view transformations. In this case, the `CornerRotateModifier` rotates a view around a specific anchor point.
+
+```swift
+struct CornerRotateModifier: ViewModifier {
+  let amount: Double // The rotation angle
+  let anchor: UnitPoint // The pivot point for the rotation
+
+  func body(content: Content) -> some View {
+    content
+      .rotationEffect(.degrees(amount), anchor: anchor) // Rotates the view
+      .clipped() // Clips the view to prevent overflow
+  }
+}
+```
+
+- **What's Happening:**
+  - `amount`: Determines how much the view rotates.
+  - `anchor`: Sets the pivot point around which the rotation occurs (e.g., `.topLeading` or `.center`).
+  - `clipped()`: Ensures the view doesn't overflow outside its boundaries during rotation.
+
+### 2. Why Extend `AnyTransition`?
+
+SwiftUI transitions work with the `AnyTransition` type, which defines how a view enters or exits. By extending `AnyTransition`, we create a clean and reusable custom transition for our app. This approach makes it easier to apply the custom transition without duplicating code.
+
+Here's the extension:
+
+```swift
+extension AnyTransition {
+  static var pivot: AnyTransition {
+    .modifier(
+      active: CornerRotateModifier(amount: -90, anchor: .topLeading), // During transition
+      identity: CornerRotateModifier(amount: 0, anchor: .topLeading) // After transition
+    )
+  }
+}
+```
+
+- **Explanation**:
+  - `active`: Defines the view's appearance during the transition (e.g., rotated by -90 degrees).
+  - `identity`: Defines the view's appearance before and after the transition (e.g., no rotation).
+- Why extend `AnyTransition`?:
+  - It simplifies the usage of your custom transition. Instead of applying `CornerRotateModifier` manually every time, you can use `.pivot` just like you would use `.opacity` or `.scale`.
+
+### 3. Using the Custom Transition
+
+Here's how to use the custom `pivot` transition:
+
+```swift
+struct ContentView: View {
+  @State private var isShowingRed = false
+
+  var body: some View {
+    ZStack {
+      Rectangle()
+        .fill(.blue)
+        .frame(width: 200, height: 200)
+
+      if isShowingRed {
+        Rectangle()
+          .fill(.red)
+          .frame(width: 200, height: 200)
+          .transition(.pivot)
+      }
+    }
+    .onTapGesture {
+      withAnimation {
+        isShowingRed.toggle()
+      }
+    }
+  }
+}
+```
+
+- **How It Works:**
+- The `.pivot` transition rotates the red rectangle out of view or into view around the top-left corner (`.topLeading`).
+- The `onTapGesture` triggers the toggle and wraps it in `withAnimation` to make the transition smooth.
+
+### Key Benefits of Extending AnyTransition
+
+- **Reusability**: By defining `pivot` in an extension, you can use it anywhere in your app without redefining the logic.
+
+  ```swift
+  .transition(.pivot)
+  ```
+
+- **Clean Code**: Encapsulating transitions in `AnyTransition` keeps your views focused on layout and interaction, rather than animation details.
+- **Consistency**: If you update the transition logic (e.g., change the rotation angle), it’s reflected everywhere you use `.pivot`.
+
+### Summary
+
+1. **Custom Modifier**: Define a reusable `ViewModifier` for your animation logic.
+2. **Extend `AnyTransition`**: Encapsulate the custom transition into an easy-to-use static property.
+3. **Apply the Transition**: Use the custom transition in your views just like built-in transitions.
+
+By building custom transitions this way, you can create unique, reusable animations that make your SwiftUI apps feel polished and dynamic!
