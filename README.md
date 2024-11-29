@@ -527,3 +527,67 @@ var body: some View {
    1. By playing with animation types like `.default`, `.spring`, and `.easeInOut`, you can create unique animations tailored to your design needs.
 
 With these tools, you can build rich, layered animations that bring your SwiftUI applications to life!
+
+
+## Animating gestures
+
+- This small code shows how we can move a view using gestures
+
+  ```swift
+  struct ContentView: View {
+  @State private var dragAmount = CGSize.zero
+
+  var body: some View {
+    LinearGradient(colors: [.yellow, .red], startPoint: .topLeading, endPoint: .bottomTrailing)
+      .frame(width: 300, height: 200)
+      .clipShape(.rect(cornerRadius: 10))
+      .offset(dragAmount)
+      .gesture(
+        DragGesture()
+          .onChanged { dragAmount = $0.translation }
+          .onEnded { _ in dragAmount = .zero }
+      )
+    }
+  }
+  ```
+
+- Adding an animation of bouncing like this, will bounce the animation when we drag as well when it moves back to the original position
+
+  ```swift
+    var body: some View {
+    LinearGradient(colors: [.yellow, .red], startPoint: .topLeading, endPoint: .bottomTrailing)
+      .frame(width: 300, height: 200)
+      .clipShape(.rect(cornerRadius: 10))
+      .offset(dragAmount)
+      .gesture(
+        DragGesture()
+          .onChanged { dragAmount = $0.translation }
+          .onEnded { _ in dragAmount = .zero }
+      )
+      .animation(.bouncy, value: dragAmount)
+  }
+  ```
+
+- As well we can animate specific values on specific parts of the gestures, for example in here we just animates when the gesture ends.
+
+  ```swift
+  struct ContentView: View {
+  @State private var dragAmount = CGSize.zero
+
+  var body: some View {
+    LinearGradient(colors: [.yellow, .red], startPoint: .topLeading, endPoint: .bottomTrailing)
+      .frame(width: 300, height: 200)
+      .clipShape(.rect(cornerRadius: 10))
+      .offset(dragAmount)
+      .gesture(
+        DragGesture()
+          .onChanged { dragAmount = $0.translation }
+          .onEnded { _ in
+            withAnimation(.bouncy) {
+              dragAmount = .zero
+            }
+          }
+      )
+    }
+  }
+  ```
